@@ -1,0 +1,35 @@
+staleLabel: stale
+
+pulls:
+  daysUntilStale: 14
+  daysUntilClose: 30
+  markComment: >
+    This pull request has been automatically marked as stale because it has not had
+    activity in the last 2 weeks. It will be closed in 30 days if no further activity occurs. Please
+    feel free to give a status update now, ping for review, or re-open when it's ready.
+    Thank you for your contributions!
+  closeComment: >
+     This pull request has been automatically closed because it has not had
+     activity in the last 30 days. Please feel free to give a status update now, ping for review, or re-open when it's ready.
+     Thank you for your contributions!
+  limitPerRun: 1
+
+exemptLabels:
+  - help wanted
+  - kind/customer issue
+  - kind/test failure
+  - Epic
+  - no stalebot
+
+issues:
+  limitPerRun: 1
+  daysUntilStale: 90
+  daysUntilClose: 30
+  markComment: >
+    This issue has been automatically marked as stale because it has not had activity in the
+    last 90 days. It will be closed in the next 30 days unless it is tagged "help wanted" or other activity
+    occurs. Thank you for your contributions.
+  closeComment: >
+    This issue has been automatically closed because it has not had activity in the
+    last month and a half. If this issue is still valid, please ping a maintainer and ask them to label it as "help wanted".
+    Thank you for your contributions.
