@@ -1,0 +1,2 @@
+# Contributation Guidelines
+We openly accept community contributions. Please refer to Medulla's [contribution guide](https://github.com/Recro/medulla-doc/blob/main/CONTRIBUTING.md) to see how you can help.
