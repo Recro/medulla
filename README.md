@@ -1,4 +1,5 @@
 # Medulla
+[![Go Report Card](https://goreportcard.com/badge/github.com/Recro/medulla)](https://goreportcard.com/report/github.com/Recro/medulla)
 
 An open low-code automation platform.
 
