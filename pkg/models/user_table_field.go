@@ -1,6 +1,6 @@
 package models
 
-//Represents a user table field
+// UserTableField represents a user table field
 type UserTableField struct {
 	ID uint
 	UserTableId uint `json:"userTableId" binding:"required"`

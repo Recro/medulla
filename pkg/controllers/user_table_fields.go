@@ -11,7 +11,7 @@ import (
 	"github.com/ompluscator/dynamic-struct"
 )
 
-//Gets the user table fields
+// GetUserTableFields gets the user table fields
 func GetUserTableFields(c *gin.Context) {
 	var userTableFields []models.UserTableField
 	models.DB.Find(&userTableFields)
@@ -19,7 +19,7 @@ func GetUserTableFields(c *gin.Context) {
 	c.JSON(http.StatusOK, userTableFields)
 }
 
-//Creates a user table field
+// CreateUserTableField creates a user table field
 func CreateUserTableField(c *gin.Context) {
 	var input models.UserTableField
 	if err := c.ShouldBindJSON(&input); err != nil {
