@@ -1,8 +1,8 @@
 package models
 
 import (
-	"gorm.io/gorm"
 	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
 // DB is the main database reference

@@ -2,13 +2,13 @@ package controllers
 
 import (
 	"errors"
-	"strconv"
 	"net/http"
+	"strconv"
 
 	"github.com/Recro/medulla/pkg/models"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	"github.com/ompluscator/dynamic-struct"
+	"gorm.io/gorm"
 )
 
 // GetUserTableFields gets the user table fields
@@ -40,13 +40,13 @@ func CreateUserTableField(c *gin.Context) {
 	defer rows.Close()
 
 	tableUpdate := dynamicstruct.NewStruct().
-			AddField("ID", 0, `json:"int"`)
+		AddField("ID", 0, `json:"int"`)
 
 	for rows.Next() {
 		var userTableField models.UserTableField
 		models.DB.ScanRows(rows, &userTableField)
-		
-		tableUpdate.AddField(userTableField.FieldName, 0, `json:"` + userTableField.FieldType + `"`)
+
+		tableUpdate.AddField(userTableField.FieldName, 0, `json:"`+userTableField.FieldType+`"`)
 	}
 
 	models.DB.Table(userTable.TableName).AutoMigrate(tableUpdate.Build().New())

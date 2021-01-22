@@ -27,9 +27,9 @@ func CreateUserTable(c *gin.Context) {
 	models.DB.Create(&input)
 
 	newTable := dynamicstruct.NewStruct().
-			AddField("ID", 0, `json:"int"`).
-			Build().
-			New()
+		AddField("ID", 0, `json:"int"`).
+		Build().
+		New()
 
 	models.DB.Table(input.TableName).AutoMigrate(newTable)
 

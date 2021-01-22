@@ -2,6 +2,6 @@ package models
 
 // UserTable represents a user table
 type UserTable struct {
-	ID uint
+	ID        uint
 	TableName string `json:"tableName" binding:"required"`
 }
