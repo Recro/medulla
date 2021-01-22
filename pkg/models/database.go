@@ -5,8 +5,10 @@ import (
 	"gorm.io/driver/sqlite"
 )
 
+//The main db reference
 var DB *gorm.DB
 
+//Connects to the database
 func Connect() {
 	db, err := gorm.Open(sqlite.Open("data.db"), &gorm.Config{})
 

@@ -8,6 +8,7 @@ import (
 	"github.com/ompluscator/dynamic-struct"
 )
 
+//Gets the user tables
 func GetUserTables(c *gin.Context) {
 	var userTables []models.UserTable
 	models.DB.Find(&userTables)
@@ -15,6 +16,7 @@ func GetUserTables(c *gin.Context) {
 	c.JSON(http.StatusOK, userTables)
 }
 
+//Creates a user table
 func CreateUserTable(c *gin.Context) {
 	var input models.UserTable
 	if err := c.ShouldBindJSON(&input); err != nil {
