@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/ompluscator/dynamic-struct"
 	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
 )
 
 // GetUserTableFields gets the user table fields
@@ -49,7 +50,9 @@ func CreateUserTableField(c *gin.Context) {
 		tableUpdate.AddField(userTableField.FieldName, 0, `json:"`+userTableField.FieldType+`"`)
 	}
 
-	models.DB.Table(userTable.TableName).AutoMigrate(tableUpdate.Build().New())
+	var ns = schema.NamingStrategy{}
+
+	models.DB.Table(ns.TableName(userTable.TableName)).AutoMigrate(tableUpdate.Build().New())
 
 	c.JSON(http.StatusOK, input)
 }

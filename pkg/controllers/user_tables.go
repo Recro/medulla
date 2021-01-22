@@ -6,6 +6,7 @@ import (
 	"github.com/Recro/medulla/pkg/models"
 	"github.com/gin-gonic/gin"
 	"github.com/ompluscator/dynamic-struct"
+	"gorm.io/gorm/schema"
 )
 
 // GetUserTables gets the user tables
@@ -31,7 +32,9 @@ func CreateUserTable(c *gin.Context) {
 		Build().
 		New()
 
-	models.DB.Table(input.TableName).AutoMigrate(newTable)
+	var ns = schema.NamingStrategy{}
+
+	models.DB.Table(ns.TableName(input.TableName)).AutoMigrate(newTable)
 
 	c.JSON(http.StatusOK, input)
 }
