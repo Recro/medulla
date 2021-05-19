@@ -1,0 +1,2 @@
+k8s_yaml('./cert-manager.yaml')
+k8s_yaml('./selfsigned-issuer.yaml')
