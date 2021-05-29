@@ -1,2 +1,0 @@
-k8s_yaml(helm('./istio-operator'))
-k8s_yaml('./istio.yaml')

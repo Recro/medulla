@@ -1,0 +1,13 @@
+apiVersion: v2
+name: medulla
+version: 0.1.0
+description: A Kubernetes-native low-code automation platform.
+type: application
+keywords:
+  - medulla
+home: https://github.com/Recro/medulla
+sources:
+  - https://github.com/Recro/medulla
+maintainers:
+  - name: Andrew Babbitt
+    email: andrew.babbitt@recro.com
