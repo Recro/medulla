@@ -1,3 +1,5 @@
+print()
+
 def wait_for_resource_exist(namespace, type, name):
     while (name not in str(local('kubectl get {type} -n {namespace} -o name && printf "\n"'.format(type=type, namespace=namespace), quiet=True, echo_off=True))):
         local('sleep 0.1 && printf "\n"', quiet=True, echo_off=True)
@@ -5,7 +7,7 @@ def wait_for_resource_exist(namespace, type, name):
 
 # Deploy cert-manager
 print('Deploying cert-manager...')
-local('kubectl apply -f deploy/deps/cert-manager.yaml', quiet=True, echo_off=True)
+local('kubectl apply -f deploy/deps/third_party/cert-manager.yaml', quiet=True, echo_off=True)
 
 print('Waiting on deployment/cert-manager to be ready...')
 local('kubectl wait --for=condition=Available --timeout=300s -n cert-manager deployment/cert-manager', quiet=True, echo_off=True)
@@ -18,27 +20,25 @@ local('kubectl wait --for=condition=Available --timeout=300s -n cert-manager dep
 print()
 
 
-
 # Deploy self-signed-issuer
 print('Deploying self-signed-issuer...')
-local('kubectl apply -f deploy/deps/self-signed-issuer.yaml', quiet=True, echo_off=True)
+local('kubectl apply -f deploy/deps/first_party/self-signed-issuer.yaml', quiet=True, echo_off=True)
 print()
-
 
 
 # Deploy istio-operator
 print('Deploying istio-operator...')
-local('kubectl apply -f deploy/deps/istio-operator.yaml', quiet=True, echo_off=True)
+local('kubectl apply -f deploy/deps/first_party/istio-operator-ns.yaml', quiet=True, echo_off=True)
+local('kubectl apply -f deploy/deps/third_party/istio-operator.yaml', quiet=True, echo_off=True)
 
 print('Waiting on deployment/istio-operator to be ready...')
 local('kubectl wait --for=condition=Available --timeout=300s -n istio-operator deployment/istio-operator', quiet=True, echo_off=True)
 print()
 
 
-
 # Deploy istio-controlplane
 print('Deploying istio-controlplane...')
-local('kubectl apply -f deploy/deps/istio-controlplane.yaml', quiet=True, echo_off=True)
+local('kubectl apply -f deploy/deps/first_party/istio-controlplane.yaml', quiet=True, echo_off=True)
 
 print('Waiting on deployment/istiod to be ready...')
 wait_for_resource_exist('istio-system', 'deployment', 'istiod')
@@ -50,10 +50,11 @@ local('kubectl wait --for=condition=Available --timeout=300s -n istio-system dep
 print()
 
 
-
 # Deploy tidb-operator
 print('Deploying tidb-operator...')
-local('kubectl apply -f deploy/deps/tidb-operator.yaml -n tidb-operator', quiet=True, echo_off=True)
+local('kubectl apply -f deploy/deps/first_party/tidb-ns.yaml -n tidb-operator', quiet=True, echo_off=True)
+local('kubectl apply -f deploy/deps/third_party/tidb-crd.yaml -n tidb-operator', quiet=True, echo_off=True)
+local('kubectl apply -f deploy/deps/third_party/tidb-operator.yaml -n tidb-operator', quiet=True, echo_off=True)
 
 print('Waiting on deployment/tidb-controller-manager to be ready...')
 local('kubectl wait --for=condition=Available --timeout=300s -n tidb-operator deployment/tidb-controller-manager', quiet=True, echo_off=True)
@@ -63,10 +64,9 @@ local('kubectl wait --for=condition=Available --timeout=300s -n tidb-operator de
 print()
 
 
-
 # Deploy tidb-cluster
 print('Deploying tidb-cluster...')
-local('kubectl apply -f deploy/deps/tidb-cluster.yaml -n tidb-cluster', quiet=True, echo_off=True)
+local('kubectl apply -f deploy/deps/first_party/tidb-cluster.yaml -n tidb-cluster', quiet=True, echo_off=True)
 
 print('Waiting on deployment/cluster-discovery to be ready...')
 wait_for_resource_exist('tidb-cluster', 'deployment', 'cluster-discovery')
@@ -86,15 +86,14 @@ local('kubectl rollout status --watch --timeout=300s -n tidb-cluster statefulset
 print()
 
 
-
 # Deploy schemahero
 print('Deploying schemahero...')
-local('kubectl apply -f deploy/deps/schemahero.yaml', quiet=True, echo_off=True)
+local('kubectl apply -f deploy/deps/first_party/schemahero-ns.yaml', quiet=True, echo_off=True)
+local('kubectl apply -f deploy/deps/third_party/schemahero.yaml', quiet=True, echo_off=True)
 
 print('Waiting on statefulset/schemahero to be ready...')
 local('kubectl rollout status --watch --timeout=300s -n schemahero-system statefulset/schemahero', quiet=True, echo_off=True)
 print()
-
 
 
 # Deploy medulla

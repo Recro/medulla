@@ -1,7 +1,269 @@
-apiVersion: v1
-kind: Namespace
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
 metadata:
-  name: schemahero-system
+  creationTimestamp: null
+  name: schemahero-role
+rules:
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  - statefulsets
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - apps
+  resources:
+  - deployments/status
+  - statefulset/status
+  verbs:
+  - get
+  - update
+  - patch
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - pods/log
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - serviceaccounts
+  verbs:
+  - get
+  - list
+  - create
+  - update
+  - delete
+  - watch
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - roles
+  - rolebindings
+  verbs:
+  - get
+  - list
+  - create
+  - update
+  - delete
+  - watch
+- apiGroups:
+  - admissionregistration.k8s.io
+  resources:
+  - mutatingwebhookconfigurations
+  - validatingwebhookconfigurations
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - databases.schemahero.io
+  resources:
+  - databases
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - databases.schemahero.io
+  resources:
+  - databases/status
+  verbs:
+  - get
+  - update
+  - patch
+- apiGroups:
+  - schemas.schemahero.io
+  resources:
+  - migrations
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - schemas.schemahero.io
+  resources:
+  - migrations/status
+  verbs:
+  - get
+  - update
+  - patch
+- apiGroups:
+  - schemas.schemahero.io
+  resources:
+  - tables
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - schemas.schemahero.io
+  resources:
+  - tables/status
+  verbs:
+  - get
+  - update
+  - patch
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  creationTimestamp: null
+  name: schemahero-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: schemahero-role
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: schemahero-system
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  name: controller-manager-service
+  namespace: schemahero-system
+spec:
+  ports:
+  - port: 443
+    targetPort: 9876
+  selector:
+    control-plane: schemahero
+status:
+  loadBalancer: {}
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  creationTimestamp: null
+  name: webhook-server-secret
+  namespace: schemahero-system
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  creationTimestamp: null
+  labels:
+    control-plane: schemahero
+  name: schemahero
+  namespace: schemahero-system
+spec:
+  selector:
+    matchLabels:
+      control-plane: schemahero
+  serviceName: ""
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        control-plane: schemahero
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/os
+                operator: In
+                values:
+                - linux
+              - key: kubernetes.io/arch
+                operator: In
+                values:
+                - amd64
+      containers:
+      - command:
+        - /manager
+        - run
+        - --enable-database-controller
+        env:
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: SECRET_NAME
+          value: webhook-server-secret
+        image: schemahero/schemahero-manager:0.12.1
+        imagePullPolicy: Always
+        name: manager
+        ports:
+        - containerPort: 9876
+          name: webhook-server
+          protocol: TCP
+        resources:
+          limits:
+            cpu: "1"
+            memory: 150Mi
+          requests:
+            cpu: 100m
+            memory: 50Mi
+        volumeMounts:
+        - mountPath: /tmp/cert
+          name: cert
+          readOnly: true
+      terminationGracePeriodSeconds: 10
+      volumes:
+      - name: cert
+        secret:
+          defaultMode: 420
+          secretName: webhook-server-secret
+  updateStrategy: {}
+status:
+  replicas: 0
 
 ---
 apiVersion: apiextensions.k8s.io/v1
@@ -2809,272 +3071,4 @@ status:
     plural: ""
   conditions: []
   storedVersions: []
-
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  creationTimestamp: null
-  name: schemahero-role
-rules:
-- apiGroups:
-  - apps
-  resources:
-  - deployments
-  - statefulsets
-  verbs:
-  - get
-  - list
-  - watch
-  - create
-  - update
-  - patch
-  - delete
-- apiGroups:
-  - apps
-  resources:
-  - deployments/status
-  - statefulset/status
-  verbs:
-  - get
-  - update
-  - patch
-- apiGroups:
-  - ""
-  resources:
-  - pods
-  verbs:
-  - get
-  - list
-  - watch
-  - create
-  - update
-  - patch
-  - delete
-- apiGroups:
-  - ""
-  resources:
-  - pods/log
-  verbs:
-  - get
-- apiGroups:
-  - ""
-  resources:
-  - secrets
-  verbs:
-  - get
-  - list
-  - watch
-  - create
-  - update
-  - patch
-  - delete
-- apiGroups:
-  - ""
-  resources:
-  - serviceaccounts
-  verbs:
-  - get
-  - list
-  - create
-  - update
-  - delete
-  - watch
-- apiGroups:
-  - rbac.authorization.k8s.io
-  resources:
-  - roles
-  - rolebindings
-  verbs:
-  - get
-  - list
-  - create
-  - update
-  - delete
-  - watch
-- apiGroups:
-  - admissionregistration.k8s.io
-  resources:
-  - mutatingwebhookconfigurations
-  - validatingwebhookconfigurations
-  verbs:
-  - get
-  - list
-  - watch
-  - create
-  - update
-  - patch
-  - delete
-- apiGroups:
-  - databases.schemahero.io
-  resources:
-  - databases
-  verbs:
-  - get
-  - list
-  - watch
-  - create
-  - update
-  - patch
-  - delete
-- apiGroups:
-  - databases.schemahero.io
-  resources:
-  - databases/status
-  verbs:
-  - get
-  - update
-  - patch
-- apiGroups:
-  - schemas.schemahero.io
-  resources:
-  - migrations
-  verbs:
-  - get
-  - list
-  - watch
-  - create
-  - update
-  - patch
-  - delete
-- apiGroups:
-  - schemas.schemahero.io
-  resources:
-  - migrations/status
-  verbs:
-  - get
-  - update
-  - patch
-- apiGroups:
-  - schemas.schemahero.io
-  resources:
-  - tables
-  verbs:
-  - get
-  - list
-  - watch
-  - create
-  - update
-  - patch
-  - delete
-- apiGroups:
-  - schemas.schemahero.io
-  resources:
-  - tables/status
-  verbs:
-  - get
-  - update
-  - patch
-
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  creationTimestamp: null
-  name: schemahero-rolebinding
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: schemahero-role
-subjects:
-- kind: ServiceAccount
-  name: default
-  namespace: schemahero-system
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  creationTimestamp: null
-  name: controller-manager-service
-  namespace: schemahero-system
-spec:
-  ports:
-  - port: 443
-    targetPort: 9876
-  selector:
-    control-plane: schemahero
-status:
-  loadBalancer: {}
-
----
-apiVersion: v1
-kind: Secret
-metadata:
-  creationTimestamp: null
-  name: webhook-server-secret
-  namespace: schemahero-system
-
----
-apiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  creationTimestamp: null
-  labels:
-    control-plane: schemahero
-  name: schemahero
-  namespace: schemahero-system
-spec:
-  selector:
-    matchLabels:
-      control-plane: schemahero
-  serviceName: ""
-  template:
-    metadata:
-      creationTimestamp: null
-      labels:
-        control-plane: schemahero
-    spec:
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: kubernetes.io/os
-                operator: In
-                values:
-                - linux
-              - key: kubernetes.io/arch
-                operator: In
-                values:
-                - amd64
-      containers:
-      - command:
-        - /manager
-        - run
-        - --enable-database-controller
-        env:
-        - name: POD_NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
-        - name: SECRET_NAME
-          value: webhook-server-secret
-        image: schemahero/schemahero-manager:0.12.1
-        imagePullPolicy: Always
-        name: manager
-        ports:
-        - containerPort: 9876
-          name: webhook-server
-          protocol: TCP
-        resources:
-          limits:
-            cpu: "1"
-            memory: 150Mi
-          requests:
-            cpu: 100m
-            memory: 50Mi
-        volumeMounts:
-        - mountPath: /tmp/cert
-          name: cert
-          readOnly: true
-      terminationGracePeriodSeconds: 10
-      volumes:
-      - name: cert
-        secret:
-          defaultMode: 420
-          secretName: webhook-server-secret
-  updateStrategy: {}
-status:
-  replicas: 0
 
